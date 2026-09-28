@@ -1,0 +1,851 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ReConIcs · Project Proposal · Black Hat Asia 2027</title>
+<meta name="description" content="ReConIcs: a passive, offline OT asset inventory tool that grades itself against CISA's 2025 asset inventory guidance and matches assets to CISA ICS advisories and the Known Exploited Vulnerabilities list.">
+<meta property="og:title" content="ReConIcs · Project Proposal">
+<meta property="og:description" content="Passive OT asset inventory, graded against CISA's 14 attributes and matched to CISA ICS advisories and KEV. Team plan to Black Hat Asia 2027.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#F3F0E8; --paper-2:#EAE5D9; --card:#FBFAF6; --ink:#16181A; --ink-2:#3A3F44; --muted:#6B7075;
+  --line:#D6D0C2; --accent:#D9480F; --accent-ink:#A33508; --accent-soft:#FBE3D3;
+  --ok:#1F6F5C; --ok-soft:#D6ECE5; --warn:#8A6100; --warn-soft:#F6EACB; --bad:#9B1C1C; --bad-soft:#F6D9D9;
+  --serif:"Fraunces",Georgia,"Times New Roman",serif;
+  --sans:"IBM Plex Sans",-apple-system,"Segoe UI",Roboto,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Consolas,monospace;
+  --r:10px; --maxw:1180px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important;animation:none!important}}
+body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.6 var(--sans);-webkit-font-smoothing:antialiased}
+a{color:var(--accent-ink);text-underline-offset:3px}
+a:hover{color:var(--accent)}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:4px}
+h1,h2,h3{font-family:var(--serif);font-weight:700;letter-spacing:-.01em;line-height:1.15;margin:0}
+h2{font-size:clamp(28px,3.4vw,40px)}
+h3{font-size:20px;font-weight:500}
+p{margin:0 0 12px;text-wrap:pretty}
+.mono{font-family:var(--mono)}
+.wrap{max-width:var(--maxw);margin:0 auto;padding:0 24px}
+
+/* top bar */
+.bar{position:sticky;top:0;z-index:20;background:rgba(243,240,232,.94);backdrop-filter:saturate(1.2);border-bottom:1px solid var(--line)}
+.bar .wrap{display:flex;align-items:center;gap:18px;height:56px}
+.brand{font-family:var(--mono);font-weight:500;font-size:14px;letter-spacing:.04em;white-space:nowrap}
+.brand b{color:var(--accent)}
+.nav{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;flex:1}
+.nav::-webkit-scrollbar{display:none}
+.nav a{font-size:13.5px;color:var(--ink-2);text-decoration:none;padding:6px 10px;border-radius:6px;white-space:nowrap}
+.nav a:hover,.nav a.on{background:var(--paper-2);color:var(--ink)}
+.bar-actions{display:flex;gap:8px}
+.btn{font:500 13.5px var(--sans);border:1px solid var(--ink);background:var(--ink);color:var(--paper);padding:8px 14px;border-radius:8px;cursor:pointer;min-height:36px}
+.btn.ghost{background:transparent;color:var(--ink)}
+.btn:hover{background:var(--accent);border-color:var(--accent);color:#fff}
+@media (max-width:700px){.nav{display:none}.bar .wrap{justify-content:space-between}#printBtn{display:none}}
+
+/* hero */
+.hero{padding:64px 0 40px;border-bottom:1px solid var(--line)}
+.hero-grid{display:grid;grid-template-columns:1.35fr 1fr;gap:48px;align-items:end}
+.eyebrow{font:500 12.5px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:14px}
+.hero h1{font-size:clamp(44px,6.4vw,84px);line-height:.98}
+.hero h1 em{font-style:normal;color:var(--accent)}
+.lede{font-size:19px;color:var(--ink-2);max-width:620px;margin-top:22px}
+.clocks{display:grid;gap:12px}
+.clock{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:16px 18px;display:grid;grid-template-columns:1fr auto;align-items:center;gap:8px}
+.clock.hot{border-color:var(--accent);background:#fff}
+.clock .lbl{font-size:13px;color:var(--muted)}
+.clock .what{font-weight:600;font-size:15px}
+.clock .num{font:500 30px var(--mono);letter-spacing:-.02em;text-align:right}
+.clock .num small{font-size:13px;color:var(--muted);margin-left:2px}
+.clock.hot .num{color:var(--accent)}
+.team-strip{display:flex;flex-wrap:wrap;gap:8px;margin-top:28px}
+.chip{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--card);border-radius:999px;padding:4px 12px 4px 4px;font-size:13.5px}
+.av{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font:600 11px var(--mono);color:#fff}
+
+/* sections */
+section{padding:72px 0;border-bottom:1px solid var(--line)}
+.sec-head{display:grid;grid-template-columns:200px 1fr;gap:32px;margin-bottom:36px}
+.sec-no{font:500 13px var(--mono);color:var(--muted);padding-top:12px;letter-spacing:.06em}
+.sec-no b{display:block;color:var(--accent);font-size:13px}
+.sec-head p.sub{color:var(--ink-2);font-size:17px;max-width:720px;margin-top:12px}
+.body{margin-left:232px}
+@media (max-width:900px){.sec-head{grid-template-columns:1fr;gap:6px}.body{margin-left:0}.hero-grid{grid-template-columns:1fr}}
+
+.quote{font-family:var(--serif);font-size:clamp(24px,2.6vw,32px);line-height:1.3;font-weight:500;max-width:860px}
+.quote cite{display:block;font:13.5px var(--sans);color:var(--muted);margin-top:14px;font-style:normal}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:28px}
+.three{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+@media (max-width:820px){.two,.three{grid-template-columns:1fr}}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:22px}
+.panel h3{margin-bottom:8px}
+.tag{display:inline-block;font:500 11.5px var(--mono);letter-spacing:.05em;text-transform:uppercase;padding:3px 8px;border-radius:5px;background:var(--paper-2);color:var(--ink-2)}
+.tag.a{background:var(--accent-soft);color:var(--accent-ink)}
+.tag.ok{background:var(--ok-soft);color:var(--ok)}
+.tag.warn{background:var(--warn-soft);color:var(--warn)}
+.tag.bad{background:var(--bad-soft);color:var(--bad)}
+ul.clean{margin:0;padding:0;list-style:none}
+ul.clean li{padding:7px 0;border-top:1px dashed var(--line)}
+ul.clean li:first-child{border-top:0}
+
+/* equation */
+.eq{display:grid;grid-template-columns:1fr auto 1fr auto 1.1fr;align-items:stretch;gap:14px}
+.eq .op{font:500 34px var(--serif);color:var(--muted);display:grid;place-items:center}
+.eq .panel.result{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.eq .panel.result .tag{background:#2b2f33;color:#f0b48f}
+@media (max-width:900px){.eq{grid-template-columns:1fr}.eq .op{padding:0}}
+
+/* pipeline */
+.pipe{display:grid;grid-template-columns:repeat(6,1fr);gap:0;border:1px solid var(--line);border-radius:var(--r);overflow:hidden;background:var(--card)}
+.stage{all:unset;cursor:pointer;padding:18px 16px;border-right:1px solid var(--line);position:relative;display:block;min-height:112px}
+.stage:last-child{border-right:0}
+.stage .n{font:500 12px var(--mono);color:var(--muted)}
+.stage .t{font-weight:600;margin-top:6px;line-height:1.3}
+.stage .s{font-size:13px;color:var(--muted);margin-top:4px}
+.stage:hover{background:var(--paper)}
+.stage[aria-selected="true"]{background:var(--ink);color:var(--paper)}
+.stage[aria-selected="true"] .n,.stage[aria-selected="true"] .s{color:#c9c4b8}
+.stage:focus-visible{outline:3px solid var(--accent);outline-offset:-3px}
+@media (max-width:900px){.pipe{grid-template-columns:1fr 1fr}.stage{border-bottom:1px solid var(--line)}}
+.detail{margin-top:18px;display:grid;grid-template-columns:1.2fr 1fr;gap:24px}
+@media (max-width:900px){.detail{grid-template-columns:1fr}}
+.kv{display:grid;grid-template-columns:140px 1fr;gap:6px 14px;font-size:14.5px}
+.kv dt{color:var(--muted)}
+.kv dd{margin:0}
+pre.code{margin:0;background:#15171a;color:#E6E1D6;border-radius:var(--r);padding:16px 18px;font:12.5px/1.55 var(--mono);overflow:auto;white-space:pre}
+pre.code .c{color:#8b939b}
+pre.code .k{color:#f0b48f}
+
+/* scorer */
+.scorer{display:grid;grid-template-columns:1.3fr 1fr;gap:28px}
+@media (max-width:900px){.scorer{grid-template-columns:1fr}}
+.presets{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+.presets button{all:unset;cursor:pointer;font-size:13.5px;border:1px solid var(--line);background:var(--card);padding:7px 12px;border-radius:8px}
+.presets button[aria-pressed="true"]{border-color:var(--ink);background:var(--ink);color:var(--paper)}
+.attrs{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+@media (max-width:560px){.attrs{grid-template-columns:1fr}}
+.attr{display:flex;gap:10px;align-items:flex-start;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:10px 12px;cursor:pointer;font-size:14px;min-height:44px}
+.attr input{margin-top:3px;accent-color:var(--accent);width:16px;height:16px;flex:none}
+.attr .src{display:block;font:11.5px var(--mono);color:var(--muted);margin-top:2px}
+.attr.on{border-color:#b9b19f;background:#fff}
+.meter{height:12px;border-radius:99px;background:var(--paper-2);overflow:hidden;margin:10px 0 6px}
+.meter i{display:block;height:100%;background:var(--accent);width:0;transition:width .35s ease}
+.bignum{font:500 56px/1 var(--mono);letter-spacing:-.03em}
+.bignum small{font-size:20px;color:var(--muted)}
+.ladder{display:grid;gap:8px;margin-top:14px}
+.rung{border:1px solid var(--line);border-radius:8px;padding:10px 12px;background:var(--card);opacity:.45;transition:opacity .2s}
+.rung.live{opacity:1;border-color:var(--ink)}
+.rung b{font-family:var(--mono);font-size:13px}
+.gaps{font-size:14px;color:var(--ink-2)}
+
+/* compare table */
+.tbl{width:100%;border-collapse:collapse;font-size:14.5px;background:var(--card);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.tbl th,.tbl td{padding:12px 14px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+.tbl thead th{font:500 12px var(--mono);letter-spacing:.05em;text-transform:uppercase;color:var(--muted);background:var(--paper)}
+.tbl tr:last-child td{border-bottom:0}
+.tbl td.us{background:#fff6ef}
+.scroll{overflow-x:auto}
+
+/* plan */
+.plan-controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:20px}
+.seg{display:inline-flex;border:1px solid var(--ink);border-radius:9px;overflow:hidden}
+.seg button{all:unset;cursor:pointer;padding:8px 14px;font-size:13.5px;font-weight:500;border-right:1px solid var(--ink);min-height:20px}
+.seg button:last-child{border-right:0}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+.people{display:flex;flex-wrap:wrap;gap:8px}
+.person{all:unset;cursor:pointer;display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--card);border-radius:999px;padding:4px 12px 4px 4px;font-size:13.5px}
+.person[aria-pressed="true"]{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink);background:#fff}
+.roles{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:28px}
+@media (max-width:900px){.roles{grid-template-columns:1fr 1fr}}
+@media (max-width:560px){.roles{grid-template-columns:1fr}}
+.role{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:16px}
+.role .who{display:flex;align-items:center;gap:10px}
+.role .name{font-weight:600}
+.role .job{font-size:13px;color:var(--muted)}
+.role p{font-size:14px;margin:10px 0 10px;color:var(--ink-2)}
+.prog{display:flex;align-items:center;gap:10px;font:12.5px var(--mono);color:var(--muted)}
+.prog .meter{flex:1;height:6px;margin:0}
+.prog .meter i{background:var(--ok)}
+.name-edit{all:unset;border-bottom:1px dashed transparent;cursor:text}
+.name-edit:hover,.name-edit:focus{border-bottom-color:var(--muted)}
+
+.timeline{position:relative}
+.week{margin-bottom:34px}
+.week-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:12px;padding-bottom:10px;border-bottom:2px solid var(--ink);margin-bottom:6px}
+.week-head h3{font-size:24px;font-weight:700}
+.week-head .dates{font:13px var(--mono);color:var(--muted)}
+.week-head .goal{flex-basis:100%;color:var(--ink-2);font-size:15px}
+.task{display:grid;grid-template-columns:28px 118px 1fr 150px;gap:14px;align-items:start;padding:14px 4px;border-bottom:1px solid var(--line)}
+.task input{width:18px;height:18px;margin-top:3px;accent-color:var(--ok);cursor:pointer}
+.task .when{font:12.5px var(--mono);color:var(--muted);padding-top:2px}
+.task .ttl{font-weight:600}
+.task .dsc{font-size:14px;color:var(--ink-2);margin-top:3px}
+.task .out{font-size:12.5px;color:var(--muted);margin-top:6px}
+.task .out b{font-family:var(--mono);font-weight:500;color:var(--ink-2)}
+.task .owners{display:flex;flex-wrap:wrap;gap:4px;justify-content:flex-end}
+.task .owners .av{width:24px;height:24px;font-size:10px}
+.task.done .ttl{text-decoration:line-through;color:var(--muted)}
+.task.dim{opacity:.28}
+.task.milestone{background:var(--accent-soft);border-radius:8px;border-bottom-color:transparent;margin:4px 0}
+.task.milestone .ttl{color:var(--accent-ink)}
+.task.today .when{color:var(--accent);font-weight:500}
+@media (max-width:760px){.task{grid-template-columns:24px 1fr}.task .when{grid-column:2}.task .main{grid-column:2}.task .owners{grid-column:2;justify-content:flex-start}}
+.hidden{display:none!important}
+
+/* checklist */
+.check{display:flex;gap:12px;align-items:flex-start;padding:10px 0;border-top:1px dashed var(--line);cursor:pointer;font-size:14.5px}
+.check:first-of-type{border-top:0}
+.check input{margin-top:4px;width:17px;height:17px;accent-color:var(--ok);flex:none}
+.check small{display:block;color:var(--muted);font-size:13px}
+
+.resgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px}
+@media (max-width:820px){.resgrid{grid-template-columns:1fr}}
+.res a{font-weight:500}
+.res li{font-size:14.5px}
+.res li span{display:block;color:var(--muted);font-size:13px}
+
+.note{font-size:13.5px;color:var(--muted);margin-top:14px}
+footer{padding:40px 0 70px;color:var(--muted);font-size:13.5px}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);background:var(--ink);color:var(--paper);padding:10px 16px;border-radius:8px;font-size:14px;opacity:0;transition:.25s;pointer-events:none;z-index:50}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+@media print{
+  .bar,.plan-controls,.presets,.btn{display:none!important}
+  body{background:#fff}
+  section{padding:28px 0;break-inside:auto}
+  .task{break-inside:avoid}
+  .task.dim{opacity:1}
+  a{color:var(--ink)}
+}
+</style>
+</head>
+<body>
+
+<header class="bar">
+  <div class="wrap">
+    <div class="brand">Re<b>Con</b>Ics</div>
+    <nav class="nav" aria-label="Sections">
+      <a href="#problem">Problem</a>
+      <a href="#idea">Idea</a>
+      <a href="#how">How it works</a>
+      <a href="#score">Try the scorer</a>
+      <a href="#landscape">Landscape</a>
+      <a href="#plan">Plan</a>
+      <a href="#submit">Submission</a>
+      <a href="#risks">Rules &amp; risks</a>
+      <a href="#learn">Resources</a>
+    </nav>
+    <div class="bar-actions">
+      <button class="btn ghost" id="printBtn" type="button">Save PDF</button>
+      <button class="btn" id="shareBtn" type="button">Share link</button>
+    </div>
+  </div>
+</header>
+
+<main>
+<div class="hero">
+  <div class="wrap hero-grid">
+    <div>
+      <div class="eyebrow">Project proposal · Black Hat Asia 2027 · RVITM, ISE</div>
+      <h1>Know what's on the plant floor, and <em>which of it is exploitable.</em></h1>
+      <p class="lede">ReConIcs reads industrial network traffic without sending a single packet, builds an asset inventory, grades that inventory against the 14 attributes CISA says every OT inventory needs, and matches each device to CISA's ICS advisories and its list of vulnerabilities already being exploited.</p>
+      <div class="team-strip" id="teamStrip"></div>
+    </div>
+    <div class="clocks">
+      <div class="clock hot">
+        <div><div class="lbl">Internal target · Sat 10 Oct, 23:59 IST</div><div class="what">Feature freeze, then test</div></div>
+        <div class="num" id="c1">–</div>
+      </div>
+      <div class="clock">
+        <div><div class="lbl">Tue 20 Oct, 23:59 SGT (21:29 IST)</div><div class="what">Black Hat Asia Briefings closes</div></div>
+        <div class="num" id="c2">–</div>
+      </div>
+      <div class="clock">
+        <div><div class="lbl">Mon 2 Nov, 23:59 SGT · confirm on portal</div><div class="what">Black Hat Asia Arsenal closes</div></div>
+        <div class="num" id="c3">–</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 01 PROBLEM -->
+<section id="problem">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="sec-no"><b>01</b>The problem</div>
+      <div>
+        <h2>You can't defend a plant you can't list.</h2>
+        <p class="sub">In August 2025 CISA, the FBI, the NSA and partner agencies in six other countries published joint guidance on OT asset inventories. Its starting point is blunt.</p>
+      </div>
+    </div>
+    <div class="body">
+      <p class="quote">"Without an inventory, organizations do not know what they have."
+        <cite>Foundations for OT Cybersecurity: Asset Inventory Guidance for Owners and Operators, CISA et al., Aug 2025 · <a href="https://www.cisa.gov/resources-tools/resources/foundations-ot-cybersecurity-asset-inventory-guidance-owners-and-operators" target="_blank" rel="noopener">source</a></cite></p>
+      <div class="three" style="margin-top:36px">
+        <div class="panel"><span class="tag">Why it's hard</span><h3 style="margin-top:10px">Scanning can break things</h3><p>Industrial controllers are fragile. Documented cases show EtherNet/IP modules dropping connections or needing a power cycle after ordinary nmap or Nessus scans. Plants therefore avoid active discovery.</p></div>
+        <div class="panel"><span class="tag">Why it's hard</span><h3 style="margin-top:10px">Inventories are half-filled</h3><p>The guidance lists 14 attributes per asset. Many, like firmware version, are exactly the ones you need to know whether a published vulnerability applies, and they're often the ones missing.</p></div>
+        <div class="panel"><span class="tag">Why it's hard</span><h3 style="margin-top:10px">Advisories don't reach the list</h3><p>CISA publishes ICS advisories in a machine-readable format (CSAF) and keeps a Known Exploited Vulnerabilities list. Linking them to a real device still takes manual work.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 02 IDEA -->
+<section id="idea">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="sec-no"><b>02</b>The idea</div>
+      <div>
+        <h2>Two ideas, one tool.</h2>
+        <p class="sub">Idea 1 makes the inventory honest about what it doesn't know. Idea 2 turns what it does know into a risk list. Each makes the other more useful: the gaps from idea 1 explain exactly why a match in idea 2 is certain or only possible.</p>
+      </div>
+    </div>
+    <div class="body">
+      <div class="eq">
+        <div class="panel"><span class="tag a">Idea 1</span><h3 style="margin-top:10px">Graded inventory</h3><p>Every asset gets the CISA 14 attributes. Each filled field carries its evidence (which packets, which protocol message) and a confidence level. Each empty field says how to fill it.</p></div>
+        <div class="op">+</div>
+        <div class="panel"><span class="tag a">Idea 2</span><h3 style="margin-top:10px">Advisory matching</h3><p>Vendor, model and firmware are matched to CISA's CSAF ICS advisories. Anything on the Known Exploited Vulnerabilities list is flagged first.</p></div>
+        <div class="op">=</div>
+        <div class="panel result"><span class="tag">ReConIcs</span><h3 style="margin-top:10px;color:#fff">"This is what you have, how sure we are, and what to patch first."</h3><p style="color:#d7d2c6">Passive only, runs offline on a laptop from a captured traffic file. Nothing is sent to the plant network, and nothing leaves the machine.</p></div>
+      </div>
+      <div class="two" style="margin-top:28px">
+        <div class="panel">
+          <h3>In scope for 10 Oct</h3>
+          <ul class="clean">
+            <li>Passive discovery from PCAP for <b>Modbus/TCP</b>, <b>S7comm</b> and <b>EtherNet/IP</b></li>
+            <li>Asset record with all 14 CISA attributes, evidence and confidence</li>
+            <li>Completeness score and a "how to fill this gap" list</li>
+            <li>CSAF advisory + KEV matching with three confidence levels</li>
+            <li>JSON, CSV and a single-file HTML report</li>
+            <li>Measured against a labelled lab ground truth</li>
+          </ul>
+        </div>
+        <div class="panel">
+          <h3>Out of scope (said out loud)</h3>
+          <ul class="clean">
+            <li>Any active scanning or probing. v1 never transmits.</li>
+            <li>Live capture on real plants or the internet</li>
+            <li>Exploitation of anything</li>
+            <li>DNP3, BACnet, PROFINET etc. (listed as future work)</li>
+            <li>A GUI. The HTML report is the interface.</li>
+            <li>Claims about real-plant accuracy; results are lab and public-PCAP only</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 03 HOW -->
+<section id="how">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="sec-no"><b>03</b>How it works</div>
+      <div>
+        <h2>Six stages, traffic in, prioritised list out.</h2>
+        <p class="sub">Click a stage to see what it does, what it's built on, and who owns it.</p>
+      </div>
+    </div>
+    <div class="body">
+      <div class="pipe" role="tablist" id="pipe"></div>
+      <div class="detail" id="stageDetail" role="tabpanel"></div>
+    </div>
+  </div>
+</section>
+
+<!-- 04 SCORER -->
+<section id="score">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="sec-no"><b>04</b>Try it</div>
+      <div>
+        <h2>What does one device's record buy you?</h2>
+        <p class="sub">This is the core logic of ReConIcs, running in your browser. Tick the attributes known for a device, or load an example, and watch the completeness score and the advisory match level change. The examples are illustrations of typical cases, not measured results.</p>
+      </div>
+    </div>
+    <div class="body scorer">
+      <div>
+        <div class="presets" id="presets"></div>
+        <div class="attrs" id="attrs"></div>
+      </div>
+      <div class="panel" style="align-self:start;position:sticky;top:76px">
+        <div class="tag">Completeness against CISA's 14</div>
+        <div class="bignum" style="margin-top:12px"><span id="scoreN">0</span><small> / 14</small></div>
+        <div class="meter"><i id="scoreBar"></i></div>
+        <div class="gaps" id="passiveNote"></div>
+        <div class="tag" style="margin-top:22px">Advisory match level</div>
+        <div class="ladder" id="ladder">
+          <div class="rung" data-l="3"><b>EXACT</b> · vendor + model + firmware. The advisory's affected version range can be checked.</div>
+          <div class="rung" data-l="2"><b>PROBABLE</b> · vendor + model. The advisory applies to this product; firmware is needed to confirm.</div>
+          <div class="rung" data-l="1"><b>POSSIBLE</b> · vendor only. Lists advisories for the vendor, as leads.</div>
+          <div class="rung" data-l="0"><b>NONE</b> · no vendor. Nothing to match; fix the inventory first.</div>
+        </div>
+        <p class="gaps" id="nextStep" style="margin-top:14px"></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 05 LANDSCAPE -->
+<section id="landscape">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="sec-no"><b>05</b>Landscape</div>
+      <div>
+        <h2>Why not just use Malcolm?</h2>
+        <p class="sub">Reviewers will ask this first. Passive ICS discovery on its own is not new, and we should say so. What's new is putting the CISA completeness grading and advisory matching in one lightweight, offline tool, and measuring how well it works.</p>
+      </div>
+    </div>
+    <div class="body">
+      <div class="scroll">
+      <table class="tbl">
+        <thead><tr><th style="width:22%">Tool</th><th>What it is</th><th style="width:34%">Where ReConIcs differs</th></tr></thead>
+        <tbody>
+          <tr><td><b>CISA Malcolm</b><br><span class="tag ok">active project</span></td><td>Full traffic-analysis suite (Zeek, Suricata, Arkime, OpenSearch) run as a cluster of containers. Already does "best guess" ICS fingerprinting and compares a NetBox inventory against observed traffic. <a href="https://github.com/cisagov/Malcolm" target="_blank" rel="noopener">GitHub</a></td><td>We build on the same parsers, but ship one small offline tool whose output is graded against the CISA 14 and ties each gap to its effect on advisory matching.</td></tr>
+          <tr><td><b>CISA ICSNPP</b><br><span class="tag ok">active project</span></td><td>Zeek parsers for about 15 industrial protocols, BSD-3 licence. <a href="https://github.com/cisagov/ICSNPP" target="_blank" rel="noopener">GitHub</a></td><td>A building block, not a competitor. We use its logs as one input.</td></tr>
+          <tr><td><b>NSA GRASSMARLIN</b><br><span class="tag warn">archived 2023</span></td><td>Passive ICS network mapping from PCAP. No longer maintained. <a href="https://github.com/nsacyber/GRASSMARLIN" target="_blank" rel="noopener">GitHub</a></td><td>Shows the need and that the gap it left is real. We add grading and vulnerability matching.</td></tr>
+          <tr><td><b>nmap ICS scripts</b><br><span class="tag bad">active probing</span></td><td>modbus-discover, s7-info, enip-info, bacnet-info. They send requests to devices.</td><td>We never transmit. Everything comes from traffic the plant already produces.</td></tr>
+          <tr><td><b>Commercial OT platforms</b></td><td>Claroty, Nozomi, Dragos, Microsoft Defender for IoT and others. Mature, paid, appliance- or sensor-based.</td><td>Free, open-source, and a laptop plus a PCAP is enough. Aimed at small plants and auditors.</td></tr>
+          <tr><td class="us"><b>ReConIcs</b></td><td class="us">Passive, offline, single tool. Inventory graded against CISA's 14, evidence per field, CSAF + KEV matching with a stated confidence.</td><td class="us">Contribution = the combination, plus a measured evaluation against a labelled ground truth.</td></tr>
+        </tbody>
+      </table>
+      </div>
+      <p class="note">Rows for Malcolm, ICSNPP and GRASSMARLIN were checked against their GitHub pages on 28 Sep 2026. The commercial row is general knowledge and was not re-checked.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 06 PLAN -->
+<section id="plan">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="sec-no"><b>06</b>Team plan</div>
+      <div>
+        <h2>Three weeks, four builders, two guides.</h2>
+        <p class="sub">Build until Saturday 10 Oct, then only test, fix and write. Submission goes in on Sunday 18 Oct, leaving two days of buffer before the Tuesday 20 Oct deadline. Click a name to see only their tasks; tick tasks as they're done (saved in your browser). Click a name on a card to edit it.</p>
+      </div>
+    </div>
+    <div class="body">
+      <div class="roles" id="roles"></div>
+      <div class="plan-controls">
+        <div class="seg" id="weekSeg" aria-label="Week filter"></div>
+        <div class="people" id="personFilter" aria-label="Person filter"></div>
+      </div>
+      <div class="timeline" id="timeline"></div>
+      <div class="panel" style="margin-top:10px">
+        <h3>After 20 Oct</h3>
+        <ul class="clean">
+          <li><b>By Mon 2 Nov</b> · submit the tool itself to Black Hat Asia <b>Arsenal</b> (source code link required). Same work, different track, and a second chance if Briefings says no.</li>
+          <li><b>Tue 1 Dec</b> · Arsenal decision (per the Arsenal portal).</li>
+          <li><b>By Tue 5 Jan 2027</b> · Briefings decision.</li>
+          <li><b>2–3 Mar 2027</b> · Briefings days, Marina Bay Sands, Singapore.</li>
+        </ul>
+        <p class="note">Tip from the Black Hat call for papers: underrepresented submitters can request an early review if they submit at least 3 weeks before the deadline. That window has already passed for 20 Oct.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 07 SUBMISSION -->
+<section id="submit">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="sec-no"><b>07</b>Submission</div>
+      <div>
+        <h2>Pitch the finding, not the tool.</h2>
+        <p class="sub">Briefings disqualifies product and vendor pitches, and talks that are mainly a tool demo belong in Arsenal. So the Briefings entry leads with a measured question; ReConIcs is how we answered it.</p>
+      </div>
+    </div>
+    <div class="body">
+      <div class="two">
+        <div class="panel">
+          <span class="tag a">Briefings · 20 Oct</span>
+          <h3 style="margin-top:10px">A research question to build the talk around</h3>
+          <p>"From passive traffic alone, how much of CISA's recommended OT inventory can you actually fill in, and how much known-exploited risk hides in the fields you can't?"</p>
+          <p class="note">This is a direction, not submission text. Black Hat bans LLM-generated submissions, so the abstract and outline must be written by the team, in your own words.</p>
+          <div id="bhChecks"></div>
+        </div>
+        <div class="panel">
+          <span class="tag">Arsenal · 2 Nov</span>
+          <h3 style="margin-top:10px">The tool, demoed live</h3>
+          <div id="arChecks"></div>
+          <h3 style="margin-top:24px">What Black Hat gives speakers</h3>
+          <ul class="clean">
+            <li><b>Briefings:</b> conference pass, $1,000 honorarium, part of the airfare, 3 hotel nights.</li>
+            <li><b>Arsenal:</b> one pass per tool; travel and hotel are on you.</li>
+          </ul>
+          <h3 style="margin-top:24px">Accepted tools in this space</h3>
+          <ul class="clean">
+            <li>ICSGoat · Arsenal, USA 2024</li>
+            <li>ICS Forensics Tools · Arsenal, USA 2023</li>
+            <li>Mantis: Asset Discovery at Scale · Arsenal, Asia 2024</li>
+            <li>Sensor and Process Fingerprinting in ICS · Briefings, USA 2019</li>
+          </ul>
+        </div>
+      </div>
+      <p class="note">Rules and form fields are from blackhat.com's call for papers and the Black Hat Asia 2027 Briefings preparation document. The 20 Oct 23:59 SGT close was confirmed in that document. The 2 Nov Arsenal date comes from the Arsenal portal via our research and should be re-checked there before relying on it.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 08 RISKS -->
+<section id="risks">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="sec-no"><b>08</b>Rules &amp; risks</div>
+      <div>
+        <h2>The non-negotiables.</h2>
+        <p class="sub">Industrial systems control physical processes. The ethics rules below are signed off by the guide in week 1 and apply to everyone.</p>
+      </div>
+    </div>
+    <div class="body">
+      <div class="scroll">
+      <table class="tbl">
+        <thead><tr><th style="width:30%">Risk</th><th>What we do about it</th><th style="width:14%">Owner</th></tr></thead>
+        <tbody>
+          <tr><td><b>Touching a real plant</b></td><td>Lab VMs and public PCAPs only. No live capture outside our own lab network, no scanning anything on the internet. Unauthorised access is an offence under India's IT Act, and on OT it can hurt people.</td><td>Everyone · Guide signs off</td></tr>
+          <tr><td><b>Our parser gets exploited</b></td><td>We read untrusted traffic. CISA's own EtherCAT parser had CVSS 9.8 bugs (ICSA-24-051-02). Malformed-packet and truncation tests before freeze.</td><td>Aditya</td></tr>
+          <tr><td><b>"Not novel" rejection</b></td><td>Lead with the measured question, cite Malcolm and GRASSMARLIN ourselves, and state the contribution in one sentence.</td><td>Yashash, Shresth</td></tr>
+          <tr><td><b>Overclaiming accuracy</b></td><td>Every number in the submission comes from the evaluation harness, and says "lab and public PCAP" next to it.</td><td>Shresth</td></tr>
+          <tr><td><b>False advisory matches</b></td><td>Three confidence levels; never say "vulnerable" without firmware in the affected range. Test on hand-picked advisories.</td><td>Yashash</td></tr>
+          <tr><td><b>LLM-written submission</b></td><td>Banned by Black Hat. The team writes the abstract and outline; guides review. Code comments and docs are fine.</td><td>Everyone</td></tr>
+          <tr><td><b>Scope creep after 10 Oct</b></td><td>Feature freeze is a tag in git. After it, only bug fixes are merged.</td><td>Yashash</td></tr>
+          <tr><td><b>Lab won't boot in time</b></td><td>Fallback: public ICS PCAP collections carry real Modbus, S7 and ENIP traffic, so parsing work isn't blocked by the lab.</td><td>Shresth</td></tr>
+        </tbody>
+      </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 09 RESOURCES -->
+<section id="learn">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="sec-no"><b>09</b>Resources</div>
+      <div>
+        <h2>Read these first.</h2>
+        <p class="sub">Every link below was opened and checked on 28 Sep 2026 (the Black Hat pages block automated checks, so open those yourself).</p>
+      </div>
+    </div>
+    <div class="body resgrid res">
+      <div class="panel"><h3>Standards &amp; guidance</h3><ul class="clean">
+        <li><a href="https://www.cisa.gov/resources-tools/resources/foundations-ot-cybersecurity-asset-inventory-guidance-owners-and-operators" target="_blank" rel="noopener">CISA OT Asset Inventory Guidance (2025)</a><span>The 14 attributes. Everyone reads this on day 1.</span></li>
+        <li><a href="https://csrc.nist.gov/pubs/sp/800/82/r3/final" target="_blank" rel="noopener">NIST SP 800-82 Rev. 3</a><span>Guide to OT security; background and the case for passive monitoring.</span></li>
+        <li><a href="https://attack.mitre.org/matrices/ics/" target="_blank" rel="noopener">MITRE ATT&amp;CK for ICS</a><span>Vocabulary for asset types and discovery techniques.</span></li>
+      </ul></div>
+      <div class="panel"><h3>Data we match against</h3><ul class="clean">
+        <li><a href="https://github.com/cisagov/CSAF" target="_blank" rel="noopener">CISA CSAF advisories (GitHub)</a><span>Machine-readable ICS advisories under csaf_files/OT.</span></li>
+        <li><a href="https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json" target="_blank" rel="noopener">CISA KEV feed (JSON)</a><span>Known Exploited Vulnerabilities; 1,728 entries on 27 Sep 2026.</span></li>
+      </ul></div>
+      <div class="panel"><h3>Building blocks</h3><ul class="clean">
+        <li><a href="https://github.com/cisagov/ICSNPP" target="_blank" rel="noopener">CISA ICSNPP</a><span>Zeek parsers for S7comm, EtherNet/IP, BACnet and more.</span></li>
+        <li><a href="https://github.com/cisagov/Malcolm" target="_blank" rel="noopener">CISA Malcolm</a><span>Read its ICS fingerprinting docs; it's our baseline.</span></li>
+        <li><a href="https://github.com/nsacyber/GRASSMARLIN" target="_blank" rel="noopener">NSA GRASSMARLIN</a><span>Archived; useful for how it classified devices.</span></li>
+      </ul></div>
+      <div class="panel"><h3>Lab &amp; test traffic</h3><ul class="clean">
+        <li><a href="https://github.com/Fortiphyd/GRFICSv2" target="_blank" rel="noopener">GRFICS v2</a><span>Virtual chemical plant with PLC, HMI and firewall.</span></li>
+        <li><a href="https://github.com/thiagoralves/OpenPLC_v3" target="_blank" rel="noopener">OpenPLC v3</a><span>Open-source PLC runtime speaking Modbus.</span></li>
+        <li><a href="https://github.com/mushorg/conpot" target="_blank" rel="noopener">Conpot</a><span>Simulated ICS devices on several protocols; good for identity responses.</span></li>
+        <li><a href="https://github.com/automayt/ICS-pcap" target="_blank" rel="noopener">ICS-pcap collection</a><span>Public captures of industrial protocols; our fallback dataset.</span></li>
+      </ul></div>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p>ReConIcs project proposal · Information Science &amp; Engineering, RV Institute of Technology and Management, Bengaluru · last updated 28 Sep 2026.</p>
+    <p>Ticks and name edits are saved only in your own browser, so each person tracks their own copy. Nothing is sent anywhere.</p>
+  </div>
+</footer>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+"use strict";
+var LS = "reconics-v1:";
+function load(k, d){ try{ var v = localStorage.getItem(LS+k); return v===null? d : JSON.parse(v); }catch(e){ return d; } }
+function save(k, v){ try{ localStorage.setItem(LS+k, JSON.stringify(v)); }catch(e){} }
+function el(tag, attrs, html){ var e=document.createElement(tag); if(attrs){ for(var k in attrs){ if(k==="class") e.className=attrs[k]; else e.setAttribute(k, attrs[k]); } } if(html!==undefined) e.innerHTML=html; return e; }
+function esc(s){ return String(s).replace(/[&<>"']/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]; }); }
+function toast(msg){ var t=document.getElementById("toast"); t.textContent=msg; t.classList.add("show"); clearTimeout(toast._t); toast._t=setTimeout(function(){ t.classList.remove("show"); }, 2200); }
+
+/* ---------- people ---------- */
+var PEOPLE = [
+  {id:"Y", name:"Yashash Mathur", job:"Lead · matching & integration", color:"#D9480F",
+   p:"Owns the architecture, the CSAF + KEV matcher, git and the freeze. Writes the Briefings outline with the team and presses submit."},
+  {id:"A", name:"Aditya Prakash", job:"Protocols & passive discovery", color:"#1F6F5C",
+   p:"Turns PCAP and Zeek/ICSNPP logs into devices: Modbus, S7comm, EtherNet/IP, and the identity messages that reveal model and firmware. Owns parser hardening."},
+  {id:"U", name:"Utsav Upadhyay", job:"Data model, scoring & reports", color:"#3B5BA5",
+   p:"Owns the asset record, device merging, the CISA-14 completeness scorer and the JSON/CSV/HTML reports. Records the demo video."},
+  {id:"S", name:"Shresth Modi", job:"Lab, ground truth & evaluation", color:"#8A6100",
+   p:"Builds the GRFICS / OpenPLC / Conpot lab, labels the ground truth, runs the evaluation harness, and writes the novelty comparison."},
+  {id:"G1", name:"Dr. Niharika P. Kumar", job:"Guide · scope, ethics, review", color:"#16181A",
+   p:"Signs off scope and the lab-only rule in week 1, reviews the frozen demo on 10–11 Oct, and reviews the outline before submission."},
+  {id:"G2", name:"Second guide (optional)", job:"Guide · mock review board", color:"#6B7075",
+   p:"Ideally someone with industry or OT experience. Reads the submission cold on 16 Oct and names its three weakest points, like a Black Hat reviewer would."}
+];
+var names = load("names", {});
+PEOPLE.forEach(function(p){ if(names[p.id]) p.name = names[p.id]; });
+function initials(n){ var w=n.replace(/^(Dr\.?|Prof\.?)\s+/i,"").split(/\s+/).filter(Boolean); return ((w[0]||"?")[0]+((w[1]||"")[0]||"")).toUpperCase(); }
+function av(p){ return '<span class="av" style="background:'+p.color+'" title="'+esc(p.name)+'">'+esc(p.id.charAt(0)==="G"?p.id:initials(p.name))+'</span>'; }
+function byId(id){ for(var i=0;i<PEOPLE.length;i++) if(PEOPLE[i].id===id) return PEOPLE[i]; return null; }
+
+/* ---------- tasks ---------- */
+var WEEKS = [
+  {n:1, title:"Week 1 · Foundation", dates:"Mon 28 Sep – Sun 4 Oct", goal:"Lab up, traffic captured and labelled, raw devices coming out of PCAPs, advisory data indexed locally."},
+  {n:2, title:"Week 2 · Build and freeze", dates:"Mon 5 Oct – Sun 11 Oct", goal:"Identity extraction, scoring, matching and reports all working end to end. Feature freeze on Saturday 10 Oct."},
+  {n:3, title:"Week 3 · Test, write, submit", dates:"Mon 12 Oct – Tue 20 Oct", goal:"No new features. Measure, fix, write the submission ourselves, get it reviewed, submit on 18 Oct."}
+];
+var TASKS = [
+  // week 1
+  {w:1,d:"2026-09-28",when:"Mon 28 Sep",o:["Y","A","U","S"],t:"Kickoff and reading day",x:"Everyone reads the CISA asset inventory guidance (the 14 attributes) and this page. Agree the scope and the lab-only rule.",out:"Shared notes on the 14 attributes"},
+  {w:1,d:"2026-09-28",when:"28–29 Sep",o:["Y"],t:"Repo, CI and module interfaces",x:"Python package layout, ruff + pytest in CI, and the interfaces between stages (discovery → record → scorer → matcher → report).",out:"GitHub repo with CI green"},
+  {w:1,d:"2026-09-29",when:"Tue 29 Sep",o:["G1"],t:"Scope and ethics sign-off",x:"Approve passive-only, lab-only work; the 10 Oct freeze; and the 18 Oct submission date.",out:"Written go-ahead"},
+  {w:1,d:"2026-09-28",when:"28 Sep – 1 Oct",o:["S"],t:"Build the lab",x:"GRFICS v2 (or the Docker-based v3), OpenPLC and Conpot on an isolated host-only network. Capture at least three PCAPs of normal operation.",out:"3+ PCAPs in the repo's data folder"},
+  {w:1,d:"2026-09-30",when:"30 Sep – 2 Oct",o:["S"],t:"Ground-truth sheet",x:"For every lab device, write down what's really there: IP, MAC, vendor, model, firmware, role. This is what we score ourselves against.",out:"ground_truth.csv"},
+  {w:1,d:"2026-09-29",when:"29 Sep – 3 Oct",o:["A"],t:"Passive discovery MVP",x:"Read PCAPs (Zeek + ICSNPP logs, or scapy as a fallback). Extract hosts, MACs, protocols and who is client/server for Modbus/TCP, S7comm and EtherNet/IP. Start on the public ICS-pcap captures so the lab isn't a blocker.",out:"PCAP in → list of devices out"},
+  {w:1,d:"2026-09-29",when:"29 Sep – 2 Oct",o:["U"],t:"Asset record and device merging",x:"Schema with the 14 CISA attributes, each with value, evidence (packet or log reference) and confidence. MAC-prefix vendor lookup. Merge one device seen over several protocols into one record.",out:"asset.schema.json + merge tests"},
+  {w:1,d:"2026-10-01",when:"1–4 Oct",o:["Y"],t:"Local advisory index",x:"Download CISA's CSAF OT advisories and the KEV feed. Build a local index: vendor, product, affected version ranges → advisory, CVE, KEV flag. Works fully offline after download.",out:"advisory index + loader tests"},
+  {w:1,d:"2026-10-04",when:"Sun 4 Oct",o:["Y","A","U","S","G1"],t:"Integration check and guide sync",x:"Run one PCAP end to end. Show the guide what exists and what's at risk.",out:"Demo of raw devices from lab traffic",m:true},
+  // week 2
+  {w:2,d:"2026-10-05",when:"5–7 Oct",o:["A"],t:"Identity extraction",x:"Pull model and firmware from messages already on the wire: EtherNet/IP ListIdentity replies, S7 system-status reads, Modbus device-identification replies. Each value keeps a pointer to the packet it came from.",out:"model/firmware filled with evidence"},
+  {w:2,d:"2026-10-05",when:"5–7 Oct",o:["U"],t:"CISA-14 completeness scorer",x:"Score each asset and the whole inventory. For every empty field, say how to fill it: a passive signal to look for, or the human who has to supply it (asset number, location, criticality).",out:"per-asset and plant-level scores"},
+  {w:2,d:"2026-10-05",when:"5–8 Oct",o:["Y"],t:"Matcher with confidence levels",x:"EXACT / PROBABLE / POSSIBLE matching against the index, KEV entries ranked first. Unit tests on a set of hand-picked real advisories.",out:"matcher + tests"},
+  {w:2,d:"2026-10-05",when:"5–8 Oct",o:["S"],t:"Evaluation harness",x:"Compare output to the ground truth: device recall and precision, per-attribute fill rate, correct-match rate, runtime per 100 MB of PCAP. One command produces all tables.",out:"make eval → tables"},
+  {w:2,d:"2026-10-08",when:"8–9 Oct",o:["U"],t:"Reports",x:"JSON and CSV for machines, and one self-contained HTML report for people: inventory, gaps, and the prioritised advisory list.",out:"report.html from a real run"},
+  {w:2,d:"2026-10-08",when:"8–9 Oct",o:["A"],t:"Parser hardening",x:"Feed truncated, malformed and random-mutated packets to every parser. Nothing may crash or hang the run.",out:"fuzz tests in CI"},
+  {w:2,d:"2026-10-09",when:"Fri 9 Oct",o:["Y"],t:"Integration and bug triage",x:"Merge everything, run all PCAPs, list the bugs. Decide what gets cut rather than slipping the freeze.",out:"bug list, cut list"},
+  {w:2,d:"2026-10-10",when:"Sat 10 Oct",o:["Y","A","U","S"],t:"FEATURE FREEZE · tag v0.1",x:"Full run on every PCAP. From here on, only bug fixes are merged.",out:"git tag v0.1",m:true},
+  {w:2,d:"2026-10-10",when:"10–11 Oct",o:["G1"],t:"Guide reviews the frozen demo",x:"Watch a live run and check the claims match what the tool actually does.",out:"review notes"},
+  // week 3
+  {w:3,d:"2026-10-12",when:"12–14 Oct",o:["S"],t:"Final evaluation run",x:"Lab and public-PCAP results, tables and plots. Write down the limits honestly: what the tool missed and why.",out:"results section, figures"},
+  {w:3,d:"2026-10-12",when:"12–14 Oct",o:["A","U"],t:"Bug fixes only",x:"Work the triage list. No new features.",out:"v0.1.x"},
+  {w:3,d:"2026-10-12",when:"12–15 Oct",o:["Y","A","U","S"],t:"Write the outline and abstract",x:"In our own words (Black Hat bans LLM-generated text). Abstract 75–300 words; detailed outline up to 4,000 characters; what's new; demo description. Yashash drafts, everyone edits.",out:"submission draft"},
+  {w:3,d:"2026-10-13",when:"13–15 Oct",o:["U"],t:"Demo video and README",x:"3–5 minute screen recording: PCAP in, report out, one KEV-flagged device explained. README with install and a one-command example.",out:"video + README"},
+  {w:3,d:"2026-10-14",when:"14–15 Oct",o:["S"],t:"Novelty statement",x:"Short, cited comparison with Malcolm, GRASSMARLIN and the nmap ICS scripts. Say plainly what they already do.",out:"one paragraph + table"},
+  {w:3,d:"2026-10-16",when:"Fri 16 Oct",o:["G2","G1"],t:"Mock review board",x:"A guide reads the submission cold, as a Black Hat reviewer would, and names its three weakest points.",out:"3 written criticisms",m:true},
+  {w:3,d:"2026-10-17",when:"Sat 17 Oct",o:["Y","A","U","S"],t:"Fix review points, final proofread",x:"Address each criticism or say why not. Check every number against the evaluation output.",out:"final draft"},
+  {w:3,d:"2026-10-18",when:"Sun 18 Oct",o:["Y"],t:"SUBMIT to Black Hat Asia Briefings",x:"Two days before the deadline. Save a PDF of everything submitted.",out:"confirmation email",m:true},
+  {w:3,d:"2026-10-19",when:"19–20 Oct",o:["Y","A","U","S"],t:"Buffer",x:"Only for emergencies. The portal closes Tue 20 Oct at 23:59 SGT, which is 21:29 IST.",out:"—"}
+];
+var done = load("done", {});
+
+/* ---------- hero chips & roles ---------- */
+function renderPeople(){
+  var strip=document.getElementById("teamStrip"); strip.innerHTML="";
+  PEOPLE.forEach(function(p){ strip.appendChild(el("span",{"class":"chip"}, av(p)+esc(p.name))); });
+  var roles=document.getElementById("roles"); roles.innerHTML="";
+  PEOPLE.forEach(function(p){
+    var mine=TASKS.filter(function(t){return t.o.indexOf(p.id)>=0;});
+    var n=mine.filter(function(t){return done[key(t)];}).length;
+    var pct=mine.length? Math.round(100*n/mine.length):0;
+    var c=el("div",{"class":"role"});
+    c.innerHTML='<div class="who">'+av(p)+'<div><div class="name"><span class="name-edit" contenteditable="true" spellcheck="false" data-id="'+p.id+'" aria-label="Edit name">'+esc(p.name)+'</span></div><div class="job">'+esc(p.job)+'</div></div></div>'+
+      '<p>'+esc(p.p)+'</p><div class="prog"><div class="meter"><i style="width:'+pct+'%"></i></div>'+n+'/'+mine.length+'</div>';
+    roles.appendChild(c);
+  });
+  roles.querySelectorAll(".name-edit").forEach(function(e){
+    e.addEventListener("keydown",function(ev){ if(ev.key==="Enter"){ ev.preventDefault(); e.blur(); }});
+    e.addEventListener("blur",function(){
+      var v=e.textContent.trim(); var p=byId(e.getAttribute("data-id"));
+      if(v && v!==p.name){ p.name=v; names[p.id]=v; save("names",names); renderAll(); toast("Name saved in this browser"); }
+      else e.textContent=p.name;
+    });
+  });
+}
+
+/* ---------- plan ---------- */
+var weekFilter=load("week",0), personFilter=load("person","");
+function key(t){ return t.w+"|"+t.t; }
+var TODAY=(function(){ var d=new Date(); var ist=new Date(d.getTime()+(d.getTimezoneOffset()+330)*60000); return ist.toISOString().slice(0,10); })();
+function renderControls(){
+  var seg=document.getElementById("weekSeg"); seg.innerHTML="";
+  [{n:0,l:"All weeks"},{n:1,l:"Week 1"},{n:2,l:"Week 2"},{n:3,l:"Week 3"}].forEach(function(o){
+    var b=el("button",{type:"button","aria-pressed":String(weekFilter===o.n)},o.l);
+    b.onclick=function(){ weekFilter=o.n; save("week",weekFilter); renderControls(); renderTimeline(); };
+    seg.appendChild(b);
+  });
+  var pf=document.getElementById("personFilter"); pf.innerHTML="";
+  PEOPLE.forEach(function(p){
+    var b=el("button",{type:"button","class":"person","aria-pressed":String(personFilter===p.id)}, av(p)+esc(p.name.split(" ")[0]==="Dr."?p.name.split(" ").slice(0,2).join(" "):p.name.split(" ")[0]));
+    b.onclick=function(){ personFilter= personFilter===p.id? "": p.id; save("person",personFilter); renderControls(); renderTimeline(); };
+    pf.appendChild(b);
+  });
+}
+function renderTimeline(){
+  var tl=document.getElementById("timeline"); tl.innerHTML="";
+  WEEKS.forEach(function(W){
+    if(weekFilter && weekFilter!==W.n) return;
+    var box=el("div",{"class":"week"});
+    box.appendChild(el("div",{"class":"week-head"},'<h3>'+W.title+'</h3><span class="dates">'+W.dates+'</span><span class="goal">'+W.goal+'</span>'));
+    TASKS.filter(function(t){return t.w===W.n;}).forEach(function(t){
+      var k=key(t);
+      var row=el("div",{"class":"task"+(t.m?" milestone":"")+(done[k]?" done":"")+(personFilter && t.o.indexOf(personFilter)<0?" dim":"")+(t.d===TODAY?" today":"")});
+      var owners=t.o.map(function(id){return av(byId(id));}).join("");
+      row.innerHTML='<input type="checkbox" aria-label="Mark done: '+esc(t.t)+'"'+(done[k]?" checked":"")+'>'+
+        '<div class="when">'+esc(t.when)+'</div>'+
+        '<div class="main"><div class="ttl">'+esc(t.t)+'</div><div class="dsc">'+esc(t.x)+'</div><div class="out">Deliverable: <b>'+esc(t.out)+'</b></div></div>'+
+        '<div class="owners">'+owners+'</div>';
+      row.querySelector("input").addEventListener("change",function(ev){
+        if(ev.target.checked) done[k]=1; else delete done[k];
+        save("done",done); row.classList.toggle("done",!!done[k]); renderPeople();
+      });
+      box.appendChild(row);
+    });
+    tl.appendChild(box);
+  });
+}
+
+/* ---------- pipeline ---------- */
+var STAGES=[
+  {t:"Capture",s:"PCAP or Zeek logs",o:["S"],
+   what:"Input is a traffic capture from a SPAN port or tap, or Zeek logs made from one. ReConIcs never touches the live network; it only reads files.",
+   built:"GRFICS / OpenPLC / Conpot lab captures, the public ICS-pcap collection, tcpdump / Wireshark.",
+   code:'<span class="c"># read-only, offline</span>\nreconics run <span class="k">--pcap</span> lab_day1.pcap <span class="k">--out</span> report/'},
+  {t:"Discover",s:"who talks, over what",o:["A"],
+   what:"Finds every host, its MAC, the industrial protocols it speaks and its role: a controller answers requests, an HMI or engineering workstation makes them.",
+   built:"Zeek + CISA ICSNPP logs, or scapy directly. Modbus/TCP, S7comm, EtherNet/IP for v1.",
+   code:'{"ip": "10.0.1.20", "mac": "00:1d:9c:..",\n "protocols": ["enip", "cip"],\n "role": "server", "peers": 3}'},
+  {t:"Identify",s:"model & firmware",o:["A"],
+   what:"Reads identity data that devices already send when their normal controller or HMI asks: EtherNet/IP ListIdentity replies, S7 system-status reads, Modbus device identification. Every value keeps a pointer to its packet.",
+   built:"Protocol parsers, MAC vendor prefixes (OUI).",
+   code:'"model": {"value": "<product name>",\n  "evidence": "pcap#4812 ENIP ListIdentity",\n  "confidence": "high"}'},
+  {t:"Grade",s:"CISA 14 attributes",o:["U"],
+   what:"Fills the asset record and scores it against CISA's 14 attributes. Every empty field says how to fill it: a passive signal to capture, or a person who has to supply it.",
+   built:"Our asset schema, merge logic, completeness scorer.",
+   code:'"completeness": "9/14",\n"missing": ["criticality", "asset_number",\n  "physical_location", "logging", "user_accounts"]'},
+  {t:"Match",s:"CSAF + KEV",o:["Y"],
+   what:"Matches vendor, model and firmware to CISA's machine-readable ICS advisories, and flags anything on the Known Exploited Vulnerabilities list. Says how sure it is: exact, probable or possible.",
+   built:"cisagov/CSAF (csaf_files/OT), CISA KEV JSON feed, a local offline index.",
+   code:'"advisories": [{"id": "ICSA-..", "cve": "CVE-..",\n  "kev": true, "match": "EXACT"}]'},
+  {t:"Report",s:"what to do first",o:["U"],
+   what:"JSON and CSV for other tools, and a single HTML file for people: the inventory, its gaps, and devices ranked by KEV first, then match confidence.",
+   built:"Plain HTML, no server, opens offline.",
+   code:'report/\n  inventory.json\n  inventory.csv\n  report.html'}
+];
+var sel=0;
+function renderPipe(){
+  var pipe=document.getElementById("pipe"); pipe.innerHTML="";
+  STAGES.forEach(function(s,i){
+    var b=el("button",{type:"button","class":"stage",role:"tab","aria-selected":String(i===sel),tabindex:i===sel?"0":"-1"},
+      '<div class="n">0'+(i+1)+'</div><div class="t">'+s.t+'</div><div class="s">'+s.s+'</div>');
+    b.onclick=function(){ sel=i; renderPipe(); };
+    b.onkeydown=function(e){ if(e.key==="ArrowRight"||e.key==="ArrowLeft"){ e.preventDefault(); sel=(sel+(e.key==="ArrowRight"?1:STAGES.length-1))%STAGES.length; renderPipe(); pipe.children[sel].focus(); } };
+    pipe.appendChild(b);
+  });
+  var s=STAGES[sel];
+  document.getElementById("stageDetail").innerHTML=
+    '<div class="panel"><h3>'+s.t+'</h3><p style="margin-top:8px">'+s.what+'</p><dl class="kv" style="margin-top:14px"><dt>Built on</dt><dd>'+s.built+'</dd><dt>Owner</dt><dd>'+s.o.map(function(id){var p=byId(id);return av(p)+" "+esc(p.name);}).join(", ")+'</dd></dl></div>'+
+    '<pre class="code" aria-label="Example">'+s.code+'</pre>';
+}
+
+/* ---------- scorer ---------- */
+var ATTRS=[
+  {k:"ip",l:"IP address",src:"passive · every packet"},
+  {k:"mac",l:"MAC address",src:"passive · same segment only"},
+  {k:"protocols",l:"Communication protocols",src:"passive · traffic"},
+  {k:"ports",l:"Active ports / services",src:"passive · traffic"},
+  {k:"role",l:"Asset role / type",src:"passive · inferred from behaviour"},
+  {k:"vendor",l:"Manufacturer",src:"passive · MAC prefix or identity reply"},
+  {k:"model",l:"Model",src:"passive · identity reply, if seen"},
+  {k:"os",l:"OS / firmware",src:"passive · identity reply, if seen"},
+  {k:"hostname",l:"Hostname",src:"passive · sometimes (DNS, NetBIOS)"},
+  {k:"logging",l:"Logging",src:"human · config review"},
+  {k:"users",l:"User accounts",src:"human · config review"},
+  {k:"criticality",l:"Criticality",src:"human · plant engineer"},
+  {k:"assetno",l:"Asset number",src:"human · asset register"},
+  {k:"location",l:"Physical location",src:"human · walkdown"}
+];
+var PRESETS=[
+  {l:"PLC, Modbus only",a:["ip","mac","protocols","ports","role","vendor"]},
+  {l:"PLC with ENIP identity seen",a:["ip","mac","protocols","ports","role","vendor","model","os"]},
+  {l:"Engineering workstation",a:["ip","mac","protocols","ports","role","vendor","hostname","os"]},
+  {l:"Device behind a router",a:["ip","protocols","ports","role"]},
+  {l:"Fully documented",a:ATTRS.map(function(a){return a.k;})}
+];
+var have=load("attrs",PRESETS[1].a.slice());
+function renderScorer(){
+  var pr=document.getElementById("presets"); pr.innerHTML="";
+  PRESETS.forEach(function(p){
+    var same=p.a.length===have.length && p.a.every(function(k){return have.indexOf(k)>=0;});
+    var b=el("button",{type:"button","aria-pressed":String(same)},esc(p.l));
+    b.onclick=function(){ have=p.a.slice(); save("attrs",have); renderScorer(); };
+    pr.appendChild(b);
+  });
+  var box=document.getElementById("attrs"); box.innerHTML="";
+  ATTRS.forEach(function(a){
+    var on=have.indexOf(a.k)>=0;
+    var lab=el("label",{"class":"attr"+(on?" on":"")},'<input type="checkbox"'+(on?" checked":"")+'><span>'+a.l+'<span class="src">'+a.src+'</span></span>');
+    lab.querySelector("input").onchange=function(e){ if(e.target.checked){ if(have.indexOf(a.k)<0) have.push(a.k);} else have=have.filter(function(k){return k!==a.k;}); save("attrs",have); renderScorer(); };
+    box.appendChild(lab);
+  });
+  var n=have.length;
+  document.getElementById("scoreN").textContent=n;
+  document.getElementById("scoreBar").style.width=(100*n/14)+"%";
+  var passive=ATTRS.filter(function(a){return a.src.indexOf("passive")===0;}).length;
+  var pk=ATTRS.filter(function(a){return a.src.indexOf("passive")===0 && have.indexOf(a.k)>=0;}).length;
+  document.getElementById("passiveNote").textContent=pk+" of the "+passive+" passively observable attributes are known. The other "+(14-passive)+" always need a person, which is why ReConIcs reports them as gaps instead of guessing.";
+  var lvl= have.indexOf("vendor")<0?0 : have.indexOf("model")<0?1 : have.indexOf("os")<0?2 : 3;
+  document.querySelectorAll("#ladder .rung").forEach(function(r){ r.classList.toggle("live", +r.getAttribute("data-l")===lvl); });
+  var next=["Next step: get the manufacturer. Capture on the same switch segment so the MAC is visible, or catch an identity reply.",
+            "Next step: capture during a maintenance or engineering session, when identity requests carrying the model are most likely.",
+            "Next step: firmware. It usually comes in the same identity reply as the model; otherwise ask the plant engineer.",
+            "Ready: affected version ranges in each advisory can be checked. KEV matches go to the top of the report."][lvl];
+  document.getElementById("nextStep").textContent=next;
+}
+
+/* ---------- checklists ---------- */
+var BH=["Abstract, 75–300 words, written by us","Detailed outline, up to 4,000 characters","What's new, compared with Malcolm and GRASSMARLIN","Answer: does it disclose a new vulnerability? (No)","Demo description and a short video sample","No product pitch anywhere, no LLM-written text","Speaker bios for everyone presenting"];
+var AR=["Source code link (a private repo link is allowed)","Tool description and what it's for","Presenters free for both conference days","Short demo video (strongly recommended)","README with a one-command example"];
+var ck=load("checks",{});
+function renderChecks(id,list,pre){
+  var b=document.getElementById(id); b.innerHTML=""; b.style.marginTop="14px";
+  list.forEach(function(item,i){
+    var k=pre+i; var lab=el("label",{"class":"check"},'<input type="checkbox"'+(ck[k]?" checked":"")+'><span>'+esc(item)+'</span>');
+    lab.querySelector("input").onchange=function(e){ if(e.target.checked) ck[k]=1; else delete ck[k]; save("checks",ck); };
+    b.appendChild(lab);
+  });
+}
+
+/* ---------- countdowns ---------- */
+var CLOCKS=[["c1","2026-10-10T23:59:00+05:30"],["c2","2026-10-20T23:59:00+08:00"],["c3","2026-11-02T23:59:00+08:00"]];
+function tick(){
+  var now=Date.now();
+  CLOCKS.forEach(function(c){
+    var ms=new Date(c[1]).getTime()-now, e=document.getElementById(c[0]);
+    if(ms<=0){ e.innerHTML='closed'; return; }
+    var d=Math.floor(ms/864e5), h=Math.floor(ms%864e5/36e5);
+    e.innerHTML=d+'<small>d</small> '+h+'<small>h</small>';
+  });
+}
+
+/* ---------- nav highlight ---------- */
+var links=[].slice.call(document.querySelectorAll(".nav a"));
+if("IntersectionObserver" in window){
+  var io=new IntersectionObserver(function(es){ es.forEach(function(en){ if(en.isIntersecting){ links.forEach(function(a){ a.classList.toggle("on", a.getAttribute("href")==="#"+en.target.id); }); } }); },{rootMargin:"-45% 0px -50% 0px"});
+  document.querySelectorAll("main section").forEach(function(s){ io.observe(s); });
+}
+
+/* ---------- actions ---------- */
+document.getElementById("shareBtn").onclick=function(){
+  var url=location.href.split("#")[0];
+  if(navigator.share){ navigator.share({title:"ReConIcs · Project proposal",url:url}).catch(function(){}); return; }
+  if(navigator.clipboard){ navigator.clipboard.writeText(url).then(function(){ toast("Link copied"); },function(){ toast(url); }); }
+  else toast(url);
+};
+document.getElementById("printBtn").onclick=function(){ window.print(); };
+
+function renderAll(){ renderPeople(); renderControls(); renderTimeline(); renderPipe(); }
+renderAll(); renderScorer(); renderChecks("bhChecks",BH,"b"); renderChecks("arChecks",AR,"a"); tick(); setInterval(tick,30000);
+})();
+</script>
+</body>
+</html>
