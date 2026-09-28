@@ -509,13 +509,13 @@ footer{padding:40px 0 70px;color:var(--muted);font-size:13.5px}
         <thead><tr><th style="width:30%">Risk</th><th>What we do about it</th><th style="width:14%">Owner</th></tr></thead>
         <tbody>
           <tr><td><b>Touching a real plant</b></td><td>Lab VMs and public PCAPs only. No live capture outside our own lab network, no scanning anything on the internet. Unauthorised access is an offence under India's IT Act, and on OT it can hurt people.</td><td>Everyone · Guide signs off</td></tr>
-          <tr><td><b>Our parser gets exploited</b></td><td>We read untrusted traffic. CISA's own EtherCAT parser had CVSS 9.8 bugs (ICSA-24-051-02). Malformed-packet and truncation tests before freeze.</td><td>Aditya</td></tr>
-          <tr><td><b>"Not novel" rejection</b></td><td>Lead with the measured question, cite Malcolm and GRASSMARLIN ourselves, and state the contribution in one sentence.</td><td>Yashash, Shresth</td></tr>
-          <tr><td><b>Overclaiming accuracy</b></td><td>Every number in the submission comes from the evaluation harness, and says "lab and public PCAP" next to it.</td><td>Shresth</td></tr>
+          <tr><td><b>Our parser gets exploited</b></td><td>We read untrusted traffic. CISA's own EtherCAT parser had CVSS 9.8 bugs (ICSA-24-051-02). Malformed-packet and truncation tests before freeze.</td><td>Person 1</td></tr>
+          <tr><td><b>"Not novel" rejection</b></td><td>Lead with the measured question, cite Malcolm and GRASSMARLIN ourselves, and state the contribution in one sentence.</td><td>Yashash, Person 3</td></tr>
+          <tr><td><b>Overclaiming accuracy</b></td><td>Every number in the submission comes from the evaluation harness, and says "lab and public PCAP" next to it.</td><td>Person 3</td></tr>
           <tr><td><b>False advisory matches</b></td><td>Three confidence levels; never say "vulnerable" without firmware in the affected range. Test on hand-picked advisories.</td><td>Yashash</td></tr>
           <tr><td><b>LLM-written submission</b></td><td>Banned by Black Hat. The team writes the abstract and outline; guides review. Code comments and docs are fine.</td><td>Everyone</td></tr>
           <tr><td><b>Scope creep after 10 Oct</b></td><td>Feature freeze is a tag in git. After it, only bug fixes are merged.</td><td>Yashash</td></tr>
-          <tr><td><b>Lab won't boot in time</b></td><td>Fallback: public ICS PCAP collections carry real Modbus, S7 and ENIP traffic, so parsing work isn't blocked by the lab.</td><td>Shresth</td></tr>
+          <tr><td><b>Lab won't boot in time</b></td><td>Fallback: public ICS PCAP collections carry real Modbus, S7 and ENIP traffic, so parsing work isn't blocked by the lab.</td><td>Person 3</td></tr>
         </tbody>
       </table>
       </div>
@@ -570,7 +570,7 @@ footer{padding:40px 0 70px;color:var(--muted);font-size:13.5px}
 <script>
 (function(){
 "use strict";
-var LS = "reconics-v1:";
+var LS = "reconics-v2:";
 function load(k, d){ try{ var v = localStorage.getItem(LS+k); return v===null? d : JSON.parse(v); }catch(e){ return d; } }
 function save(k, v){ try{ localStorage.setItem(LS+k, JSON.stringify(v)); }catch(e){} }
 function el(tag, attrs, html){ var e=document.createElement(tag); if(attrs){ for(var k in attrs){ if(k==="class") e.className=attrs[k]; else e.setAttribute(k, attrs[k]); } } if(html!==undefined) e.innerHTML=html; return e; }
@@ -581,21 +581,21 @@ function toast(msg){ var t=document.getElementById("toast"); t.textContent=msg; 
 var PEOPLE = [
   {id:"Y", name:"Yashash Mathur", job:"Lead · matching & integration", color:"#D9480F",
    p:"Owns the architecture, the CSAF + KEV matcher, git and the freeze. Writes the Briefings outline with the team and presses submit."},
-  {id:"A", name:"Aditya Prakash", job:"Protocols & passive discovery", color:"#1F6F5C",
+  {id:"A", name:"Person 1", job:"Protocols & passive discovery", color:"#1F6F5C",
    p:"Turns PCAP and Zeek/ICSNPP logs into devices: Modbus, S7comm, EtherNet/IP, and the identity messages that reveal model and firmware. Owns parser hardening."},
-  {id:"U", name:"Utsav Upadhyay", job:"Data model, scoring & reports", color:"#3B5BA5",
+  {id:"U", name:"Person 2", job:"Data model, scoring & reports", color:"#3B5BA5",
    p:"Owns the asset record, device merging, the CISA-14 completeness scorer and the JSON/CSV/HTML reports. Records the demo video."},
-  {id:"S", name:"Shresth Modi", job:"Lab, ground truth & evaluation", color:"#8A6100",
+  {id:"S", name:"Person 3", job:"Lab, ground truth & evaluation", color:"#8A6100",
    p:"Builds the GRFICS / OpenPLC / Conpot lab, labels the ground truth, runs the evaluation harness, and writes the novelty comparison."},
-  {id:"G1", name:"Dr. Niharika P. Kumar", job:"Guide · scope, ethics, review", color:"#16181A",
+  {id:"G1", name:"Person 4", job:"Guide · scope, ethics, review", color:"#16181A",
    p:"Signs off scope and the lab-only rule in week 1, reviews the frozen demo on 10–11 Oct, and reviews the outline before submission."},
-  {id:"G2", name:"Second guide (optional)", job:"Guide · mock review board", color:"#6B7075",
+  {id:"G2", name:"Person 5", job:"Guide · mock review board", color:"#6B7075",
    p:"Ideally someone with industry or OT experience. Reads the submission cold on 16 Oct and names its three weakest points, like a Black Hat reviewer would."}
 ];
 var names = load("names", {});
 PEOPLE.forEach(function(p){ if(names[p.id]) p.name = names[p.id]; });
 function initials(n){ var w=n.replace(/^(Dr\.?|Prof\.?)\s+/i,"").split(/\s+/).filter(Boolean); return ((w[0]||"?")[0]+((w[1]||"")[0]||"")).toUpperCase(); }
-function av(p){ return '<span class="av" style="background:'+p.color+'" title="'+esc(p.name)+'">'+esc(p.id.charAt(0)==="G"?p.id:initials(p.name))+'</span>'; }
+function av(p){ return '<span class="av" style="background:'+p.color+'" title="'+esc(p.name)+'">'+esc(initials(p.name))+'</span>'; }
 function byId(id){ for(var i=0;i<PEOPLE.length;i++) if(PEOPLE[i].id===id) return PEOPLE[i]; return null; }
 
 /* ---------- tasks ---------- */
@@ -675,7 +675,7 @@ function renderControls(){
   });
   var pf=document.getElementById("personFilter"); pf.innerHTML="";
   PEOPLE.forEach(function(p){
-    var b=el("button",{type:"button","class":"person","aria-pressed":String(personFilter===p.id)}, av(p)+esc(p.name.split(" ")[0]==="Dr."?p.name.split(" ").slice(0,2).join(" "):p.name.split(" ")[0]));
+    var b=el("button",{type:"button","class":"person","aria-pressed":String(personFilter===p.id)}, av(p)+esc(/^Person /.test(p.name)?p.name:p.name.split(" ")[0]));
     b.onclick=function(){ personFilter= personFilter===p.id? "": p.id; save("person",personFilter); renderControls(); renderTimeline(); };
     pf.appendChild(b);
   });
